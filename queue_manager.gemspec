@@ -5,7 +5,7 @@ require 'queue_manager/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "queue_manager"
-  spec.version       = QueueManager::VERSION
+  spec.version       = QueueManager::Version::STRING
   spec.authors       = ["Mikhail Grachev"]
   spec.email         = ["work@mgrachev.com"]
   spec.summary       = %q{TODO: Write a short summary. Required.}
