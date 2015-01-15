@@ -4,8 +4,6 @@ module QueueManager
   class Daemon
     class << self
 
-      PID_FILE = Rails.root.join('tmp', 'pids', 'queue_manager.pid')
-
       def start
         if running?
           puts 'Queue manager is already running. Use: QueueManager::Daemon.stop'
@@ -14,7 +12,7 @@ module QueueManager
 
         fork do
           $running = true
-          File.write(PID_FILE, Process.pid)
+          File.write(QueueManager.config.pid_file, Process.pid)
           puts 'Queue manager is running...'
 
           Signal.trap('TERM') { $running = false }
@@ -33,8 +31,8 @@ module QueueManager
           return false
         end
 
-        Process.kill('TERM', File.read(PID_FILE).to_i)
-        FileUtils.rm_rf(PID_FILE)
+        Process.kill('TERM', File.read(QueueManager.config.pid_file).to_i)
+        FileUtils.rm_rf(QueueManager.config.pid_file)
         true
       rescue
         false
@@ -43,7 +41,7 @@ module QueueManager
       private
 
       def running?
-        File.exist? PID_FILE
+        File.exist? QueueManager.config.pid_file
       end
 
     end

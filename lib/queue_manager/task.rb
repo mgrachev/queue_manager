@@ -3,15 +3,18 @@ require 'active_support/core_ext/object/blank'
 
 module QueueManager
   class Task
-    class << self
 
-      MARKER = '*'
-      MARKED_REGEXP = Regexp.new("^#{92.chr}#{MARKER}") # /^\*/
+    MARKER = '*'
+    MARKED_REGEXP = Regexp.new("^#{92.chr}#{MARKER}") # /^\*/
+
+    class << self
 
       #
       # Add task in redis
       #
       # @param id [String] Ebook ID
+      #
+      # @return [Fixnum] Score
       #
       def add(id)
         transaction do
@@ -21,6 +24,7 @@ module QueueManager
           redis.multi do
             redis.zadd(QueueManager.config.queue, score, id)
           end
+          return score
         end
       end
 
@@ -35,7 +39,7 @@ module QueueManager
           marked_id = "#{MARKER}#{id}"
           redis_score = redis.zscore(QueueManager.config.queue, marked_id)
 
-          if score.to_i == redis_score
+          if score.to_i == redis_score.to_i
             redis.multi do
               redis.zrem(QueueManager.config.queue, marked_id)
             end
