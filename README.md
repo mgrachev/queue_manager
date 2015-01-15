@@ -1,6 +1,6 @@
 # QueueManager
 
-TODO: Write a gem description
+Queue manager for Rails application. Based on Redis (Sorted Set).
 
 ## Installation
 
@@ -18,9 +18,42 @@ Or install it yourself as:
 
     $ gem install queue_manager
 
+Run installer:
+
+    $ rails generate queue_manager:install
+
 ## Usage
 
-TODO: Write usage instructions here
+Add the name of class worker in `config/initializers/queue_manager.rb`:
+
+```ruby
+  # Used sidekiq worker. Invokes method perform_async on this class
+  config.worker = 'SidekiqWorker' # Default: nil
+```
+
+Start queue manager daemon:
+
+    $ rake queue_manager:start
+
+Add task to the queue:
+
+```ruby
+score = QueueManager::Task.add(7)
+```
+
+score - weight of task. Used to remove.
+After 5 seconds, will be launched `SidekiqWorker.perform_async(7)`.
+
+Remove task from the queue:
+
+```ruby
+QueueManager::Task.remove(7, score)
+```
+
+Stop queue manager daemon
+
+    $ rake queue_manager:stop
+
 
 ## Contributing
 

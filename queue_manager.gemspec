@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Mikhail Grachev']
   spec.email         = ['work@mgrachev.com']
   spec.summary       = %q{Queue manager based on Redis (Sorted Set)}
-  spec.description   = %q{Queue manager for Rails application based on Redis (Sorted Set)}
+  spec.description   = %q{Queue manager for Rails application. Based on Redis (Sorted Set)}
   spec.homepage      = 'https://github.com/mgrachev/queue_manager'
   spec.license       = 'MIT'
 
