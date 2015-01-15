@@ -18,5 +18,5 @@ QueueManager.configure do |config|
   # config.worker = 'SidekiqWorker' # Default: nil
 
   # Path to pid file
-  # config.pid_file = Rails.root.join('tmp', 'pids', 'queue_manager.pid') # Default: File.join('/tmp', 'queue_manager.pid')
+  config.pid_file = Rails.root.join('tmp', 'pids', 'queue_manager.pid') # Default: /tmp/queue_manager.pid
 end

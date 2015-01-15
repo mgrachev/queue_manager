@@ -15,3 +15,5 @@ end
 require_relative 'queue_manager/daemon'
 require_relative 'queue_manager/task'
 require_relative 'queue_manager/version'
+
+require_relative 'queue_manager/railtie' if defined? Rails

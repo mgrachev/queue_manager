@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = QueueManager::Version::STRING
   spec.authors       = ['Mikhail Grachev']
   spec.email         = ['work@mgrachev.com']
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = %q{Queue manager based on Redis (Sorted Set)}
+  spec.description   = %q{Queue manager for Rails application based on Redis (Sorted Set)}
   spec.homepage      = 'https://github.com/mgrachev/queue_manager'
   spec.license       = 'MIT'
 
@@ -20,8 +20,8 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 1.9.3'
 
-  spec.add_dependency 'redis', '~> 3.2'
-  spec.add_dependency 'rails', '~> 3.1'
+  spec.add_dependency 'redis', '>= 3.2'
+  spec.add_dependency 'rails', '>= 3.1'
 
   spec.add_development_dependency 'bundler', '~> 1.7'
   spec.add_development_dependency 'rake', '~> 10.0'
