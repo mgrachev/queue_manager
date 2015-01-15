@@ -41,7 +41,8 @@ Add task to the queue:
 score = QueueManager::Task.add(7)
 ```
 
-score - weight of task. Used to remove.
+score - weight of task, is used to remove.
+
 After 5 seconds, will be launched `SidekiqWorker.perform_async(7)`.
 
 Remove task from the queue:
