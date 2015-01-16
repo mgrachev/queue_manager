@@ -13,6 +13,10 @@ describe QueueManager::Task do
       allow(QueueManager::Task).to receive(:redis).and_return(mock_redis)
       allow(QueueManager::Task).to receive(:timestamp).and_return(time[0].to_i)
     end
+
+    unless example.metadata[:skip_stub_worker]
+      allow(QueueManager.config).to receive(:worker).and_return(nil)
+    end
   end
 
   # Constants
@@ -114,7 +118,7 @@ describe QueueManager::Task do
       expect(mock_redis.zrange(queue, 0, -1, with_scores: true)).to match_array([["*#{id}", new_score.to_f]])
     end
 
-    it 'runs worker' do
+    it 'runs worker', skip_stub_worker: true do
       worker_class = double(:worker_class)
       worker_string = double(:worker_string, constantize: worker_class)
       expect(worker_class).to receive(:perform_async).with(id)
