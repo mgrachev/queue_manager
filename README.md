@@ -51,7 +51,7 @@ Remove task from the queue:
 QueueManager::Task.remove(7, score)
 ```
 
-Stop queue manager daemon
+Stop queue manager daemon:
 
     $ rake queue_manager:stop
 

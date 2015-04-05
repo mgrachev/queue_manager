@@ -1,4 +1,3 @@
-require 'redis'
 require 'active_support/core_ext/object/blank'
 
 module QueueManager
@@ -12,7 +11,7 @@ module QueueManager
       #
       # Add task in redis
       #
-      # @param id [String] Ebook ID
+      # @param id [String] Unique identifier of task
       #
       # @return [Fixnum] Score
       #
@@ -31,7 +30,7 @@ module QueueManager
       #
       # Remove task from redis by score
       #
-      # @param id [String] Ebook ID
+      # @param id [String] Unique identifier of task
       # @param score [String] Score of task
       #
       def remove(id, score)

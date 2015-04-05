@@ -1,3 +1,4 @@
+require 'redis'
 require_relative 'queue_manager/configuration'
 
 module QueueManager
