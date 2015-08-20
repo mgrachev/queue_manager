@@ -2,6 +2,12 @@
 
 Queue manager for Rails application. Based on Redis (Sorted Set).
 
+[![Gem Version](https://badge.fury.io/rb/queue_manager.svg)](http://badge.fury.io/rb/queue_manager)
+[![Build Status](https://travis-ci.org/mgrachev/queue_manager.svg?branch=master)](https://travis-ci.org/mgrachev/queue_manager)
+[![Coverage Status](https://coveralls.io/repos/mgrachev/queue_manager/badge.svg?branch=master&service=github)](https://coveralls.io/github/mgrachev/queue_manager?branch=master)
+[![Code Climate](https://codeclimate.com/github/mgrachev/queue_manager/badges/gpa.svg)](https://codeclimate.com/github/mgrachev/queue_manager)
+[![Dependency Status](https://gemnasium.com/mgrachev/queue_manager.svg)](https://gemnasium.com/mgrachev/queue_manager)
+
 ## Installation
 
 Add this line to your application's Gemfile:
