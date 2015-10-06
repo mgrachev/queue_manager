@@ -17,11 +17,11 @@ module QueueManager
       #
       def add(id)
         transaction do
-          time = redis.zscore(QueueManager.config.queue, "#{MARKER}#{id}") || timestamp
-          score = time + QueueManager.config.delay
+          time = redis.zscore(config.queue, "#{MARKER}#{id}") || timestamp
+          score = time + config.delay
 
           redis.multi do
-            redis.zadd(QueueManager.config.queue, score, id)
+            redis.zadd(config.queue, score, id)
           end
           return score
         end
@@ -36,11 +36,11 @@ module QueueManager
       def remove(id, score)
         transaction do
           marked_id = "#{MARKER}#{id}"
-          redis_score = redis.zscore(QueueManager.config.queue, marked_id)
+          redis_score = redis.zscore(config.queue, marked_id)
 
           if score.to_i == redis_score.to_i
             redis.multi do
-              redis.zrem(QueueManager.config.queue, marked_id)
+              redis.zrem(config.queue, marked_id)
             end
           end
         end
@@ -52,24 +52,24 @@ module QueueManager
       def handling_queue
         transaction do
           # Return the first element from range
-          id, score = redis.zrange(QueueManager.config.queue, 0, 0, with_scores: true).flatten
+          id, score = redis.zrange(config.queue, 0, 0, with_scores: true).flatten
 
           return false if id.blank? && score.blank?
           return false if score > timestamp
 
-          new_score = timestamp + QueueManager.config.timeout
+          new_score = timestamp + config.timeout
 
           redis.multi do
             if MARKED_REGEXP =~ id
-              redis.zadd(QueueManager.config.queue, new_score, id)
+              redis.zadd(config.queue, new_score, id)
             else
-              redis.zrem(QueueManager.config.queue, id)
-              redis.zadd(QueueManager.config.queue, new_score, "#{MARKER}#{id}")
+              redis.zrem(config.queue, id)
+              redis.zadd(config.queue, new_score, "#{MARKER}#{id}")
             end
           end
 
-          if QueueManager.config.worker.present?
-            QueueManager.config.worker.constantize.perform_async id.gsub(MARKED_REGEXP, '')
+          if config.worker.present?
+            config.worker.constantize.perform_async id.gsub(MARKED_REGEXP, '')
           end
         end
       end
@@ -77,7 +77,7 @@ module QueueManager
       private
 
       def redis
-        $redis ||= Redis.new(url: QueueManager.config.redis_connection_string)
+        $redis ||= Redis.new(url: config.redis_connection_string)
       end
 
       def timestamp
@@ -85,9 +85,13 @@ module QueueManager
       end
 
       def transaction(&block)
-        redis.watch(QueueManager.config.queue)
+        redis.watch(config.queue)
         block.call
         redis.unwatch
+      end
+
+      def config
+        QueueManager.config
       end
 
     end
