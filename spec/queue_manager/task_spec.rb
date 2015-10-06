@@ -8,7 +8,7 @@ describe QueueManager::Task do
   let(:mock_redis)  { MockRedis.new }
   let(:time)        { [1421157737, 875678] }
 
-  before :each do |example|
+  before do |example|
     unless example.metadata[:skip_stub_redis]
       allow(QueueManager::Task).to receive(:redis).and_return(mock_redis)
       allow(QueueManager::Task).to receive(:timestamp).and_return(time[0].to_i)
