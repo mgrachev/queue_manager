@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'queue_manager'
+
+require 'irb'
+IRB.start
