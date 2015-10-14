@@ -7,7 +7,6 @@ module QueueManager
       timeout:                  15,
       queue:                    'default_queue',
       redis_connection_string:  'redis://localhost:6379/0',
-      worker:                   nil,
       pid_file:                 File.join('/tmp', 'queue_manager.pid')
     }
 

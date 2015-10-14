@@ -14,9 +14,6 @@ QueueManager.configure do |config|
   # URL for connection to redis
   # config.redis_connection_string = 'redis://example.com:6379/0' # Default: redis://localhost:6379/0
 
-  # Used sidekiq worker. Invokes method perform_async on this class
-  # config.worker = 'SidekiqWorker' # Default: nil
-
   # Path to pid file
   config.pid_file = Rails.root.join('tmp', 'pids', 'queue_manager.pid') # Default: /tmp/queue_manager.pid
 end

@@ -14,6 +14,7 @@ module QueueManager
 end
 
 require_relative 'queue_manager/daemon'
+require_relative 'queue_manager/redis'
 require_relative 'queue_manager/task'
 require_relative 'queue_manager/version'
 
