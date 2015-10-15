@@ -1,3 +1,7 @@
+require 'active_support/core_ext/object/blank'
+require 'active_support/core_ext/string/inflections'
+require 'active_support/core_ext/hash/indifferent_access'
+
 module QueueManager
   class Task
     include QueueManager::Redis
@@ -17,8 +21,8 @@ module QueueManager
     # @return [QueueManager::Task] Instance of QueueManager::Task
     #
     def self.add(id, job:, enqueue: :now, **options)
-      # TODO test
       raise ArgumentError, "Option enqueue should be #{ENQUEUES.join(' or ')}" unless ENQUEUES.include?(enqueue)
+      raise ArgumentError, 'Job should be present' unless job
 
       transaction do
         time = redis.zscore(config.queue, "#{MARKER}#{id}") || timestamp
@@ -27,17 +31,15 @@ module QueueManager
         task = new(id, score)
         task.job = job
         task.enqueue = enqueue
-        task.options = options
+        task.options = options.to_json
 
         redis.multi do
           redis.zadd(config.queue, score, id)
         end
 
-        # TODO: Test
         return task
       end
     end
-    alias_method :create, :add
 
     #
     # Check the queue and run tasks
@@ -61,10 +63,12 @@ module QueueManager
           end
         end
 
-        # TODO test
-        task = new(id, score)
-        task.score = new_score
-        task.job.to_s.constantize.public_send("perform_#{task.enqueue}", task, id, **task.options)
+        original_id = id.tr('*', '')
+        task = new(original_id, score.to_i)
+        task.update_score(new_score)
+        options = JSON.load(task.options).symbolize_keys
+
+        task.job.constantize.public_send("perform_#{task.enqueue}", task, original_id, **options)
       end
     end
 
@@ -72,8 +76,7 @@ module QueueManager
     # and allows you to manage it. You can change a job of the task, pass additional
     # parameters or delete the task.
 
-    attr_reader :id
-    attr_accessor :score
+    attr_reader :id, :score
 
     #
     # @param id [String] The unique identifier of the task
@@ -81,6 +84,15 @@ module QueueManager
     #
     def initialize(id, score)
       @id, @score = id, score
+    end
+
+    def update_score(value)
+      _job, _enqueue, _options = job, enqueue, options
+      delete_from_redis
+      @score = value
+      self.job = _job
+      self.enqueue = _enqueue
+      self.options = _options
     end
 
     %w(job enqueue options).each do |name|
@@ -105,17 +117,11 @@ module QueueManager
 
         if score.to_i == redis_score.to_i
           redis.multi do
-            # TODO: Test
-            %w(job enqueue options).each do |name|
-              redis.del("#{key}/#{name}")
-            end
-
+            delete_from_redis
             redis.zrem(config.queue, marked_id)
-            # TODO: Test
-            return true
           end
+          return true
         else
-          # TODO: Test
           return false
         end
       end
@@ -124,6 +130,12 @@ module QueueManager
     alias_method :delete, :remove
 
     private
+
+    def delete_from_redis
+      %w(job enqueue options).each do |name|
+        redis.del("#{key}/#{name}")
+      end
+    end
 
     def key
       "#{config.queue}/#{id}/#{score}"

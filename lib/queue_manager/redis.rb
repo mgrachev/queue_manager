@@ -7,7 +7,7 @@ module QueueManager
     private
 
     def redis
-      $redis ||= Redis.new(url: config.redis_connection_string)
+      $redis ||= ::Redis.new(url: config.redis_connection_string)
     end
 
     def timestamp
