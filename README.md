@@ -1,6 +1,6 @@
-# QueueManager
+# Queue Manager
 
-Queue manager for Rails application. Based on Redis (Sorted Set).
+Queue manager for your Rails application with support Active Job. Under the hood Redis and [sorted sets](http://redis.io/topics/data-types#sorted-sets). 
 
 [![Gem Version](https://badge.fury.io/rb/queue_manager.svg)](http://badge.fury.io/rb/queue_manager)
 [![Build Status](https://travis-ci.org/mgrachev/queue_manager.svg?branch=master)](https://travis-ci.org/mgrachev/queue_manager)
@@ -30,37 +30,61 @@ Run installer:
 
 ## Usage
 
-Add the name of class worker in `config/initializers/queue_manager.rb`:
-
-```ruby
-  # Used sidekiq worker. Invokes method perform_async on this class
-  config.worker = 'SidekiqWorker' # Default: nil
-```
-
-Start queue manager daemon:
+Start the queue manager
 
     $ rake queue_manager:start
 
-Add task to the queue:
+Create a new job
+
+    $ rails generate job test
+
+
+Rails creates a new class `TestJob` into `app/jobs/test_job.rb`.
+Change it to work with the queue manager: 
 
 ```ruby
-score = QueueManager::Task.add(7)
+class TestJob < ActiveJob::Base
+  queue_as :default
+
+  def perform(task, id, **kwargs)
+    # Do something later
+    # ...
+    task.done
+  end
+end
 ```
 
-score - weight of task, is used to remove.
+Method `perform` should take the following arguments:
 
-After 5 seconds, will be launched `SidekiqWorker.perform_async(7)`.
+* `task` - the task of the queue manager;
+* `id` - the unique identifier of the task;
+* `kwargs` - hash with additional arguments.
 
-Remove task from the queue:
+What can you do with a task:
+
+* Remove it from the queue: `task.remove` or `task.done`
+* Change the job of this task at the next start: `task.job = :OtherTestJob`
+* Change the variant of the next start: `task.enqueue = :now` or `task.enqueue = :later`
+* Passing the additional argument for the next start: `task.options = { arg2: 'var2' }`
+
+Add the task to the queue:
 
 ```ruby
-QueueManager::Task.remove(7, score)
+task = QueueManager.add_task(7, job: :TestJob, enqueue: :later, arg1: 'var1')
 ```
 
-Stop queue manager daemon:
+Until such time as the task has not yet been taken in the process, you can change its parameters through the variable `task`.
+Once the task has taken the work, control it can only `TestJob` and evenly until the task is again back in the lineup for the timeout.
+
+After a certain period of time, the queue manager takes the task in processing and starts job
+
+```ruby
+TestJob.perform_later(task, 7, arg1: 'var1')
+```
+
+To stop the queue manager, run
 
     $ rake queue_manager:stop
-
 
 ## Contributing
 

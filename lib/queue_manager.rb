@@ -11,6 +11,10 @@ module QueueManager
     yield config
   end
 
+  def self.add_task(*args)
+    Task.add(*args)
+  end
+
 end
 
 require_relative 'queue_manager/daemon'
