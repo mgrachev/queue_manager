@@ -115,16 +115,14 @@ module QueueManager
         marked_id = "#{MARKER}#{id}"
         redis_score = redis.zscore(config.queue, marked_id)
 
-        if score.to_i == redis_score.to_i
-          redis.multi do
-            delete_from_redis
-            redis.zrem(config.queue, marked_id)
-          end
-          return true
-        else
-          return false
+        return false unless score.to_i == redis_score.to_i
+
+        redis.multi do
+          delete_from_redis
+          redis.zrem(config.queue, marked_id)
         end
       end
+      true
     end
     alias_method :done, :remove
     alias_method :delete, :remove
