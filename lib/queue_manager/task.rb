@@ -5,6 +5,7 @@ require 'active_support/core_ext/hash/indifferent_access'
 module QueueManager
   class Task
     include QueueManager::Redis
+    include GlobalID::Identification
 
     MARKER = '*'
     MARKED_REGEXP = Regexp.new("^#{92.chr}#{MARKER}") # /^\*/
@@ -45,31 +46,27 @@ module QueueManager
     # Check the queue and run tasks
     #
     def self.handling_queue
-      transaction do
-        # Return the first element from range
-        id, score = redis.zrange(config.queue, 0, 0, with_scores: true).flatten
+      # Return the first element from range
+      id, score = redis.zrange(config.queue, 0, 0, with_scores: true).flatten
 
-        return false if id.blank? && score.blank?
-        return false if score > timestamp
+      return false if id.blank? && score.blank?
+      return false if score > timestamp
 
-        new_score = timestamp + config.timeout
+      new_score = timestamp + config.timeout
 
-        redis.multi do
-          if MARKED_REGEXP =~ id
-            redis.zadd(config.queue, new_score, id)
-          else
-            redis.zrem(config.queue, id)
-            redis.zadd(config.queue, new_score, "#{MARKER}#{id}")
-          end
-        end
-
-        original_id = id.tr('*', '')
-        task = new(original_id, score.to_i)
-        task.update_score(new_score)
-        options = JSON.load(task.options).symbolize_keys
-
-        task.job.constantize.public_send("perform_#{task.enqueue}", task, original_id, **options)
+      if MARKED_REGEXP =~ id
+        redis.zadd(config.queue, new_score, id)
+      else
+        redis.zrem(config.queue, id)
+        redis.zadd(config.queue, new_score, "#{MARKER}#{id}")
       end
+
+      original_id = id.tr('*', '')
+      task = new(original_id, score.to_i)
+      task.update_score(new_score)
+      options = JSON.load(task.options).symbolize_keys
+
+      task.job.constantize.public_send("perform_#{task.enqueue}", task, original_id, **options)
     end
 
     # Instance of QueueManager::Task provides detailed information about the task
@@ -87,12 +84,17 @@ module QueueManager
     end
 
     def update_score(value)
-      _job, _enqueue, _options = job, enqueue, options
-      delete_from_redis
-      @score = value
-      self.job = _job
-      self.enqueue = _enqueue
-      self.options = _options
+      transaction do
+        _job, _enqueue, _options = job, enqueue, options
+
+        redis.multi do
+          delete_from_redis
+          @score = value
+          self.job = _job
+          self.enqueue = _enqueue
+          self.options = _options
+        end
+      end
     end
 
     %w(job enqueue options).each do |name|
@@ -126,6 +128,10 @@ module QueueManager
     end
     alias_method :done, :remove
     alias_method :delete, :remove
+
+    def to_global_id
+      GlobalID.create(t, app: 'queue-manager', score: 123)
+    end
 
     private
 

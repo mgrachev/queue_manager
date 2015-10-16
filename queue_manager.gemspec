@@ -21,7 +21,8 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = '>= 1.9.3'
 
   spec.add_dependency 'redis', '>= 3.2'
-  spec.add_dependency 'rails', '>= 3.1'
+  spec.add_dependency 'rails', '>= 4.2'
+  spec.add_dependency 'globalid', '~> 0.3'
 
   spec.add_development_dependency 'bundler', '~> 1.7'
   spec.add_development_dependency 'rake', '~> 10.0'
