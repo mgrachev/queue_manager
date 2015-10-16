@@ -64,13 +64,12 @@ What can you do with a task:
 
 * Remove it from the queue: `task.remove` or `task.done`
 * Change the job of this task at the next start: `task.job = :OtherTestJob`
-* Change the variant of the next start: `task.enqueue = :now` or `task.enqueue = :later`
 * Passing the additional argument for the next start: `task.options = { arg2: 'var2' }`
 
 Add the task to the queue:
 
 ```ruby
-task = QueueManager.add_task(7, job: :TestJob, enqueue: :later, arg1: 'var1')
+task = QueueManager.add_task(7, job: :TestJob, arg1: 'var1')
 ```
 
 Until such time as the task has not yet been taken in the process, you can change its parameters through the variable `task`.

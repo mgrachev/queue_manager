@@ -19,7 +19,7 @@ describe QueueManager::Task do
     unless example.metadata[:skip_stub_worker]
       test_job = double(:test_job)
       job_string = double(:job_string, constantize: test_job)
-      allow(test_job).to receive(:perform_now)
+      allow(test_job).to receive(:perform_later)
       allow_any_instance_of(QueueManager::Task).to receive(:job).and_return(job_string)
     end
   end
@@ -38,19 +38,8 @@ describe QueueManager::Task do
     end
   end
 
-  context '::ENQUEUES' do
-    it 'returns an array' do
-      expect(QueueManager::Task::ENQUEUES).to match_array([:now, :later])
-      expect(QueueManager::Task::ENQUEUES).to be_instance_of Array
-    end
-  end
-
   # Public methods
   context '.add' do
-    it 'raise an error if an enqueue is invalid' do
-      expect { QueueManager::Task.add(id, job: nil, enqueue: :never) }.to raise_error(ArgumentError, 'Option enqueue should be now or later')
-    end
-
     it 'raise an error if job is not present' do
       expect { QueueManager::Task.add(id, job: nil) }.to raise_error(ArgumentError, 'Job should be present')
     end
@@ -83,7 +72,6 @@ describe QueueManager::Task do
      it 'sets options for the task', skip_stub_worker: true do
        task = QueueManager::Task.add(id, job: job)
        expect(task.job).to eq job.to_s
-       expect(task.enqueue).to eq 'now'
      end
   end
 
@@ -127,12 +115,8 @@ describe QueueManager::Task do
       mock_redis.zadd(queue, task.score, "*#{id}")
 
       expect(task.job).to eq job.to_s
-      expect(task.enqueue).to eq 'now'.to_s
-
       task.remove
-
       expect(task.job).to be_nil
-      expect(task.enqueue).to be_nil
     end
 
     it 'returns true' do
@@ -188,7 +172,7 @@ describe QueueManager::Task do
       allow(QueueManager::Task).to receive(:new).and_return(task)
       test_job = double(:test_job)
       job_string = double(:job_string, constantize: test_job)
-      expect(test_job).to receive(:perform_now).with(task, id, arg: 'arg1')
+      expect(test_job).to receive(:perform_later).with(task, id, arg: 'arg1')
       allow_any_instance_of(QueueManager::Task).to receive(:job).and_return(job_string)
       QueueManager::Task.handling_queue
     end

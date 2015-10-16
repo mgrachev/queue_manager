@@ -9,20 +9,17 @@ module QueueManager
 
     MARKER = '*'
     MARKED_REGEXP = Regexp.new("^#{92.chr}#{MARKER}") # /^\*/
-    ENQUEUES = [:now, :later]
 
     #
     # Add a new task to the queue
     #
     # @param id [String] The unique identifier of the task
     # @param job [Symbol] Job class name
-    # @param enqueue [Symbol] Now or later
     # @param options [Hash] Hash of additional options
     #
     # @return [QueueManager::Task] Instance of QueueManager::Task
     #
-    def self.add(id, job:, enqueue: :now, **options)
-      raise ArgumentError, "Option enqueue should be #{ENQUEUES.join(' or ')}" unless ENQUEUES.include?(enqueue)
+    def self.add(id, job:, **options)
       raise ArgumentError, 'Job should be present' unless job
 
       transaction do
@@ -31,7 +28,6 @@ module QueueManager
 
         task = new(id, score)
         task.job = job
-        task.enqueue = enqueue
         task.options = options.to_json
 
         redis.multi do
@@ -66,7 +62,7 @@ module QueueManager
       task.update_score(new_score)
       options = JSON.load(task.options).symbolize_keys
 
-      task.job.constantize.public_send("perform_#{task.enqueue}", task, original_id, **options)
+      task.job.constantize.public_send(:perform_later, task, original_id, **options)
     end
 
     # Instance of QueueManager::Task provides detailed information about the task
@@ -85,19 +81,18 @@ module QueueManager
 
     def update_score(value)
       transaction do
-        _job, _enqueue, _options = job, enqueue, options
+        _job, _options = job, options
 
         redis.multi do
           delete_from_redis
           @score = value
           self.job = _job
-          self.enqueue = _enqueue
           self.options = _options
         end
       end
     end
 
-    %w(job enqueue options).each do |name|
+    %w(job options).each do |name|
       define_method "#{name}=" do |value|   # def job=(value)
         redis.set("#{key}/#{name}", value)  #   redis.set("#{key}/job", value)
       end                                   # end
@@ -136,7 +131,7 @@ module QueueManager
     private
 
     def delete_from_redis
-      %w(job enqueue options).each do |name|
+      %w(job options).each do |name|
         redis.del("#{key}/#{name}")
       end
     end
