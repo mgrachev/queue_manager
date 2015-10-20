@@ -1,6 +1,6 @@
 # Queue Manager
 
-Queue manager for your Rails application with support Active Job. Under the hood Redis and [sorted sets](http://redis.io/topics/data-types#sorted-sets). 
+Queue manager for your Rails application with support [Active Job](https://github.com/rails/rails/tree/master/activejob) and [Global ID](https://github.com/rails/globalid). Under the hood Redis and [sorted sets](http://redis.io/topics/data-types#sorted-sets). 
 
 [![Gem Version](https://badge.fury.io/rb/queue_manager.svg)](http://badge.fury.io/rb/queue_manager)
 [![Build Status](https://travis-ci.org/mgrachev/queue_manager.svg?branch=master)](https://travis-ci.org/mgrachev/queue_manager)
