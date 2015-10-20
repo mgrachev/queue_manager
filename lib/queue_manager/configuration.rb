@@ -1,6 +1,8 @@
 module QueueManager
   class Configuration
 
+    IDENTIFIER = 'queue-manager'.freeze
+
     DEFAULT_CONFIG = {
       wait:                     1,
       delay:                    5,
@@ -16,6 +18,10 @@ module QueueManager
       define_method key do                                      # def wait
         instance_variable_get("@#{key}") || DEFAULT_CONFIG[key] #   @wait || DEFAULT_CONFIG[:wait]
       end                                                       # end
+    end
+
+    def identifier
+      IDENTIFIER
     end
 
   end
