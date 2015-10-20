@@ -3,22 +3,25 @@ require 'fileutils'
 module QueueManager
   class Daemon
     class << self
-
       def start
         if running?
-          puts 'Queue manager is already running. Use: QueueManager::Daemon.stop'
+          puts 'Queue manager is already running. To stop it, use rake queue_manager:stop'
           return false
         end
 
         fork do
           $running = true
-          File.write(QueueManager.config.pid_file, Process.pid)
+          File.write(pid_file, Process.pid)
           puts 'Queue manager is running...'
 
-          Signal.trap('TERM') { $running = false }
+          Signal.trap('TERM') do
+            $running = false
+            remove_pid_file
+          end
+
           while $running do
             QueueManager::Task.handling_queue
-            sleep(QueueManager.config.wait)
+            sleep config.wait
           end
         end
       ensure
@@ -27,12 +30,12 @@ module QueueManager
 
       def stop
         unless running?
-          puts 'Queue manager is not running. Use: QueueManager::Daemon.start'
+          puts 'Queue manager is not running. To start it, use: rake queue_manager:start'
           return false
         end
 
-        Process.kill('TERM', File.read(QueueManager.config.pid_file).to_i)
-        FileUtils.rm_rf(QueueManager.config.pid_file)
+        Process.kill('TERM', File.read(pid_file).to_i)
+        remove_pid_file
         true
       rescue
         false
@@ -41,9 +44,20 @@ module QueueManager
       private
 
       def running?
-        File.exist? QueueManager.config.pid_file
+        File.exist? pid_file
       end
 
+      def remove_pid_file
+        FileUtils.rm_rf(pid_file)
+      end
+
+      def pid_file
+        config.pid_file
+      end
+
+      def config
+        QueueManager.config
+      end
     end
   end
 end
