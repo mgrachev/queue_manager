@@ -1,6 +1,7 @@
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/string/inflections'
-require 'active_support/core_ext/hash/indifferent_access'
+require 'active_support/hash_with_indifferent_access'
+require 'active_support/core_ext/object/json'
 
 module QueueManager
   class Task
@@ -84,7 +85,7 @@ module QueueManager
         _job, _options = job, options
 
         redis.multi do
-          delete_from_redis
+          clear_task
           @score = value
           self.job = _job
           self.options = _options
@@ -115,7 +116,7 @@ module QueueManager
         return false unless score.to_i == redis_score.to_i
 
         redis.multi do
-          delete_from_redis
+          clear_task
           redis.zrem(config.queue, marked_id)
         end
       end
@@ -124,13 +125,18 @@ module QueueManager
     alias_method :done, :remove
     alias_method :delete, :remove
 
+    #
+    # Convert task to global id
+    #
+    # @return [GlobalID] Instance of GlobalID
+    #
     def to_global_id
-      GlobalID.create(t, app: 'queue-manager', score: 123)
+      GlobalID.create(self, app: config.identifier, score: score)
     end
 
     private
 
-    def delete_from_redis
+    def clear_task
       %w(job options).each do |name|
         redis.del("#{key}/#{name}")
       end
