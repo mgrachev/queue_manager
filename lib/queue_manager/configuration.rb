@@ -9,7 +9,8 @@ module QueueManager
       timeout:                  15,
       queue:                    'default_queue',
       redis_connection_string:  'redis://localhost:6379/0',
-      pid_file:                 File.join('/tmp', 'queue_manager.pid')
+      pid_file:                 File.join('/tmp', 'queue_manager.pid'),
+      log_output:               STDOUT
     }
 
     DEFAULT_CONFIG.each_key do |key|

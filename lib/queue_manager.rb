@@ -1,9 +1,10 @@
 require 'redis'
 require 'global_id'
+require 'logger'
 
 require_relative 'queue_manager/configuration'
 require_relative 'queue_manager/daemon'
-require_relative 'queue_manager/redis'
+require_relative 'queue_manager/util'
 require_relative 'queue_manager/task'
 require_relative 'queue_manager/version'
 
@@ -20,7 +21,11 @@ module QueueManager
     Task.add(*args)
   end
 
-  module_function :config, :configure, :add_task
+  def logger
+    $logger ||= Logger.new(config.log_output, 'weekly')
+  end
+
+  module_function :config, :configure, :add_task, :logger
 end
 
 require_relative 'queue_manager/railtie' if defined? Rails

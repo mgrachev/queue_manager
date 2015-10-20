@@ -5,7 +5,7 @@ require 'active_support/core_ext/object/json'
 
 module QueueManager
   class Task
-    include QueueManager::Redis
+    include QueueManager::Util
     include GlobalID::Identification
 
     MARKER = '*'
@@ -35,6 +35,7 @@ module QueueManager
           redis.zadd(config.queue, score, id)
         end
 
+        logger.info "Add new task \"#{id}\" with job: \"#{job}\""
         return task
       end
     end
@@ -53,9 +54,11 @@ module QueueManager
 
       if MARKED_REGEXP =~ id
         redis.zadd(config.queue, new_score, id)
+        logger.info "Time is over for the task \"#{id}\". Updated time"
       else
         redis.zrem(config.queue, id)
         redis.zadd(config.queue, new_score, "#{MARKER}#{id}")
+        logger.info "Task \"#{id}\" is taken into work"
       end
 
       original_id = id.tr('*', '')
@@ -64,6 +67,7 @@ module QueueManager
       options = JSON.load(task.options).symbolize_keys
 
       task.job.constantize.public_send(:perform_later, task, original_id, **options)
+      logger.info "Launched job: #{task.job}.perform_later(task, \"#{original_id}\", #{options})"
     end
 
     # Instance of QueueManager::Task provides detailed information about the task
@@ -119,6 +123,8 @@ module QueueManager
           clear_task
           redis.zrem(config.queue, marked_id)
         end
+
+        logger.info "The task \"#{id}\" is removed from the queue"
       end
       true
     end

@@ -12,7 +12,7 @@ module QueueManager
         fork do
           $running = true
           File.write(pid_file, Process.pid)
-          puts 'Queue manager is running...'
+          logger.info 'Queue manager is running'
 
           Signal.trap('TERM') do
             $running = false
@@ -36,6 +36,7 @@ module QueueManager
 
         Process.kill('TERM', File.read(pid_file).to_i)
         remove_pid_file
+        logger.info 'Queue manager is stopped'
         true
       rescue
         false
@@ -53,6 +54,10 @@ module QueueManager
 
       def pid_file
         config.pid_file
+      end
+
+      def logger
+        QueueManager.logger
       end
 
       def config

@@ -16,4 +16,7 @@ QueueManager.configure do |config|
 
   # Path to pid file
   config.pid_file = Rails.root.join('tmp', 'pids', 'queue_manager.pid') # Default: /tmp/queue_manager.pid
+
+  # Log output
+  config.log_output = Rails.root.join('log', 'queue_manager.log') # Default: STDOUT
 end

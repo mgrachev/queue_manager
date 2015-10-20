@@ -10,6 +10,7 @@ describe QueueManager::Task do
   let(:job)         { :TestJob }
 
   before do |example|
+    allow(QueueManager.config).to receive(:log_output).and_return(nil)
     allow(QueueManager::Task).to receive(:redis).and_return(mock_redis)
     allow(QueueManager::Task).to receive(:timestamp).and_return(time[0].to_i)
 

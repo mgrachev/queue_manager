@@ -1,5 +1,5 @@
 module QueueManager
-  module Redis
+  module Util
     def self.included(base)
       base.extend self
     end
@@ -22,6 +22,10 @@ module QueueManager
 
     def config
       QueueManager.config
+    end
+
+    def logger
+      QueueManager.logger
     end
   end
 end
