@@ -31,4 +31,4 @@ end
 require_relative 'queue_manager/railtie' if defined? Rails
 
 require_relative 'queue_manager/task_locator'
-GlobalID::Locator.use QueueManager.config.identifier, QueueManager::TaskLocator
+GlobalID::Locator.use QueueManager.config.identifier, QueueManager::TaskLocator.new
