@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = QueueManager::Version::STRING
   spec.authors       = ['Mikhail Grachev']
   spec.email         = ['work@mgrachev.com']
-  spec.summary       = %q{Queue manager based on Redis (Sorted Set)}
-  spec.description   = %q{Queue manager for Rails application. Based on Redis (Sorted Set)}
+  spec.summary       = %q{Queue manager for your Rails application with support Active Job and Global ID}
+  spec.description   = %q{Queue manager for your Rails application with support Active Job and Global ID. Under the hood Redis and sorted sets.}
   spec.homepage      = 'https://github.com/mgrachev/queue_manager'
   spec.license       = 'MIT'
 
