@@ -1,6 +1,5 @@
 module QueueManager
   class Configuration
-
     IDENTIFIER = 'queue-manager'.freeze
 
     DEFAULT_CONFIG = {
@@ -24,6 +23,5 @@ module QueueManager
     def identifier
       IDENTIFIER
     end
-
   end
 end

@@ -21,7 +21,7 @@ module QueueManager
     # @return [QueueManager::Task] Instance of QueueManager::Task
     #
     def self.add(id, job:, **options)
-      raise ArgumentError, 'Job should be present' unless job
+      fail ArgumentError, 'Job should be present' unless job
 
       transaction do
         time = redis.zscore(config.queue, "#{MARKER}#{id}") || timestamp
@@ -81,18 +81,20 @@ module QueueManager
     # @param score [Fixnum] Timestamp of the task
     #
     def initialize(id, score)
-      @id, @score = id, score
+      @id = id
+      @score = score
     end
 
     def update_score(value)
       transaction do
-        _job, _options = job, options
+        old_job = job
+        old_options = options
 
         redis.multi do
           clear_task
           @score = value
-          self.job = _job
-          self.options = _options
+          self.job = old_job
+          self.options = old_options
         end
       end
     end
@@ -151,6 +153,5 @@ module QueueManager
     def key
       "#{config.queue}/#{id}/#{score}"
     end
-
   end
 end

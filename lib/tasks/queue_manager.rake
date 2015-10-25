@@ -8,5 +8,4 @@ namespace :queue_manager do
   task stop: :environment do
     QueueManager::Daemon.stop
   end
-
 end

@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = QueueManager::Version::STRING
   spec.authors       = ['Mikhail Grachev']
   spec.email         = ['work@mgrachev.com']
-  spec.summary       = %q{Queue manager for your Rails application with support Active Job and Global ID}
-  spec.description   = %q{Queue manager for your Rails application with support Active Job and Global ID. Under the hood Redis and sorted sets.}
+  spec.summary       = 'Queue manager for your Rails application with support Active Job and Global ID'
+  spec.description   = 'Queue manager for your Rails application with support Active Job and Global ID. Under the hood Redis and sorted sets.'
   spec.homepage      = 'https://github.com/mgrachev/queue_manager'
   spec.license       = 'MIT'
 
@@ -30,4 +30,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'mock_redis', '~> 0.15'
   spec.add_development_dependency 'yard', '~> 0.8.7'
   spec.add_development_dependency 'redcarpet', '~> 3.2' # Markdown implementation (for yard)
+  spec.add_development_dependency 'rubocop'
 end

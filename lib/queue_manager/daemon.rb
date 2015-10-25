@@ -19,7 +19,7 @@ module QueueManager
             remove_pid_file
           end
 
-          while $running do
+          while $running
             QueueManager::Task.handling_queue
             sleep config.wait
           end
